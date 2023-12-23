@@ -1,0 +1,81 @@
+%{
+#include "chw.h"
+#include "cerendinc-hw3.tab.h" 
+#include <string.h>
+int lineCnt = 1;
+%}
+%%
+
+
+
+    
+
+
+['][^']*[']		{
+                    yytext[strlen(yytext)-1] = '\0';
+                    yytext+=1;
+			        yylval.string_value = strdup(yytext);
+                    int i;
+                  	for(i=0; i<strlen(yytext);i++){
+                        if(yytext[i] == '\n'){
+                            lineCnt+=1;
+                        }
+                    }
+			        
+			        return tSTRING;
+			
+			    }
+
+
+"\n"    {lineCnt++;}
+
+["]Get["]		return tGET;
+["]Set["]		return tSET;
+["]Function["]		return tFUNCTION;
+["]Print["]		return tPRINT;
+["]If["]		return tIF;
+["]Return["]		return tRETURN;
+
+["]"+"["]		{
+                    yylval.curLine = lineCnt; 
+                    return tADD;
+                }
+["]"-"["] 		{
+                    yylval.curLine = lineCnt; 
+                    return tSUB;
+                }
+["]"*"["] 		{
+                    yylval.curLine = lineCnt; 
+                    return tMUL;
+                }
+["]"/"["] 		{
+                    yylval.curLine = lineCnt; 
+                    return tDIV;
+                }
+["]"++"["]		return tINC;
+["]">"["]		return tGT;
+["]"=="["]		return tEQUALITY;
+["]"--"["]		return tDEC;
+["]"<"["]		return tLT;
+["]"<="["]		return tLEQ;
+["]">="["]		return tGEQ;
+
+
+["][_a-zA-Z][a-zA-Z0-9_]*["]	return tIDENT;
+				
+[0-9]+ |
+-[0-9]+ 		{
+                    yylval.intNode.int_value = atoi(yytext);
+			        return tINT;
+                }
+
+[0-9]+"."[0-9]+	|
+-[0-9]+"."[0-9]+	{
+			            yylval.realNode.real_value = atof(yytext);
+			            return tREAL; 
+			        }
+	
+[ \t\r]+
+.			return yytext[0];
+
+%%
