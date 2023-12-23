@@ -1,0 +1,194 @@
+tGET \"Get\"
+tSET \"Set\"
+tFUNCTION \"Function\"
+tPRINT \"Print\"
+tFOR \"For\"
+tIF \"If\"
+tRETURN \"Return\"
+tCOMMA \,
+tPLUS \"\+\"
+tMUL \"\*\"
+tINC \"\+\+\"
+tLBRAC \[
+tGT \">\"
+tGEQ \">=\"
+tEQUALITY \"==\"
+tMINUS \"-\"
+tDIV \"\/\"
+tDEC \"--\"
+tRBRAC \]
+tLT \"<\"
+tLEQ \"<=\"
+tIDENT \"[a-zA-Z_][a-zA-Z_0-9]*\"
+tSTRING \'[^']*\'
+tNUM (\-?[0-9]+\.{1}[0-9]+)|(\-?[0-9]+)
+wspace [\ \t\r]+
+
+%{
+    int lineCnt = 1;
+    int xx = 1;
+%}
+
+%%
+
+\n lineCnt++;
+
+
+{tGET} printf("%d tGET\n", lineCnt);
+{tSET} printf("%d tSET\n", lineCnt);
+{tFUNCTION} printf("%d tFUNCTION\n", lineCnt);
+{tPRINT} printf("%d tPRINT\n", lineCnt);
+{tFOR} printf("%d tFOR\n", lineCnt);
+{tIF} printf("%d tIF\n", lineCnt);
+{tRETURN} printf("%d tRETURN\n", lineCnt);
+{tCOMMA} printf("%d tCOMMA\n", lineCnt);
+{tPLUS} printf("%d tPLUS\n", lineCnt);
+{tMUL} printf("%d tMUL\n", lineCnt);
+{tINC} printf("%d tINC\n", lineCnt);
+{tLBRAC} printf("%d tLBRAC\n", lineCnt);
+{tGT} printf("%d tGT\n", lineCnt);
+{tGEQ} printf("%d tGEQ\n", lineCnt);
+{tEQUALITY} printf("%d tEQUALITY\n", lineCnt);
+{tMINUS} printf("%d tMINUS\n", lineCnt);
+{tDIV} printf("%d tDIV\n", lineCnt);
+{tDEC} printf("%d tDEC\n", lineCnt);
+{tRBRAC} printf("%d tRBRAC\n", lineCnt);
+{tLT} printf("%d tLT\n", lineCnt);
+{tLEQ} printf("%d tLEQ\n", lineCnt);
+{wspace} xx++;
+
+{tNUM} {
+    
+    printf("%d tNUM (%s) ", lineCnt, yytext);
+
+
+    int i;
+    int dot = 0;
+    int cntDot;
+    int rCnt = 0;
+    int lCnt=0;
+    int lCnt2=0;
+    int nCnt=0;
+    for(i=0; i<strlen(yytext); i++){
+        if(yytext[i] == '.'){
+            dot = 1;
+            cntDot = i;
+            break;
+        }
+    }
+
+    if(dot == 1){
+        for(i=strlen(yytext)-1; i>cntDot+1; i--){
+            if(yytext[i] == '0'){
+                rCnt+=1;
+            }
+            else{
+                break;
+            }
+        }
+        if(yytext[0] != '-'){
+            for(i=0; i<cntDot-1; i++){
+                if(yytext[i] == '0'){
+                    lCnt+=1;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+        if(yytext[0] == '-'){
+            for(i=1; i<cntDot-1; i++){
+                if(yytext[i] == '0'){
+                    lCnt2+=1;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+
+        for(i=0; i<rCnt;i++){
+
+            yytext[strlen(yytext)-1] = '\0';
+        }
+        for(i=0; i<lCnt;i++){
+
+            yytext+=1;
+        }
+        for(i=0; i<lCnt2;i++){
+
+            yytext+=1;
+            yytext[0] = '-';
+        }
+        
+    }
+    else{
+        if(yytext[0] != '-'){
+            for(i=0;i<strlen(yytext)-1; i++){
+                if(yytext[i] == '0'){
+                    nCnt+=1;
+                }
+                else{
+                    break;
+                }
+            }
+            for(i=0; i<nCnt;i++){
+                yytext+=1;
+            }
+        }
+        if(yytext[0] == '-'){
+            for(i=1; i<strlen(yytext)-1; i++){
+                if(yytext[i] == '0'){
+                    nCnt+=1;
+                }
+                else{
+                    break;
+                }
+            }
+            for(i=0; i<nCnt; i++){
+                yytext+=1;
+                yytext[0] = '-';
+            }
+        }
+    }
+
+    printf("(%s)\n", yytext);
+}
+
+
+{tIDENT} {
+    int i;
+    yytext[strlen(yytext)-1] = '\0';
+    yytext+=1;
+    printf("%d tIDENT (%s)\n", lineCnt, yytext);
+    for(i=0; i<strlen(yytext);i++){
+        if(yytext[i] == '\n'){
+            lineCnt+=1;
+        }
+    }
+}
+
+
+{tSTRING} {
+    int i;
+    yytext[strlen(yytext)-1] = '\0';
+    yytext+=1;
+    printf("%d tSTRING (%s)\n", lineCnt, yytext);
+    for(i=0; i<strlen(yytext);i++){
+        if(yytext[i] == '\n'){
+            lineCnt+=1;
+        }
+    }
+}
+
+
+
+. printf("%d ILLEGAL CHARACTER (%s)\n", lineCnt, yytext);
+
+%%
+
+int main(){
+
+    yylex();
+    return(0);
+}
